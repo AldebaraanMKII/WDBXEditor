@@ -33,21 +33,21 @@ namespace WDBXEditor.Common
 		public enum TextWowEnum
 		{
 			enUS,
-			enGB,
 			koKR,
 			frFR,
 			deDE,
-			enCN,
 			zhCN,
-			enTW,
 			zhTW,
 			esES,
 			esMX,
 			ruRU,
-			ptPT,
+			Unk,
 			ptBR,
 			itIT,
-			Unk,
+			Unk2,
+			Unk3,
+			Unk4,
+			Unk5,
 		}
 
 		public enum UpdateMode
