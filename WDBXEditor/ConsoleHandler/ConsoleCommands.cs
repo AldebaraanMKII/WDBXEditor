@@ -24,7 +24,7 @@ namespace WDBXEditor.ConsoleHandler
         /// <para>load -f "*.dbc" -s ".mpq/wow dir" -b 11802</para>
         /// </summary>
         /// <param name="args"></param>
-        /// 
+        ///
         public static void LoadCommand(string[] args)
         {
             var pmap = ConsoleManager.ParseCommand(args);
@@ -115,14 +115,14 @@ namespace WDBXEditor.ConsoleHandler
             string source = ParamCheck<string>(pmap, "-s");
             string output = ParamCheck<string>(pmap, "-o");
             SourceType sType = GetSourceType(source);
-            
+
             if (string.IsNullOrWhiteSpace(filter))
                 filter = "*";
 
             string regexfilter = "(" + Regex.Escape(filter).Replace(@"\*", @".*").Replace(@"\?", ".") + ")";
             Func<string, bool> TypeCheck = t => Path.GetExtension(t).ToLower() == ".dbc" || Path.GetExtension(t).ToLower() == ".db2";
 
-            
+
             var dic = new ConcurrentDictionary<string, MemoryStream>();
             switch (sType)
             {
@@ -255,7 +255,7 @@ namespace WDBXEditor.ConsoleHandler
         }
 
         #endregion
-        
+
         #region SQL Dump
         /// <summary>
         /// Exports a file directly into a SQL database
@@ -284,7 +284,7 @@ namespace WDBXEditor.ConsoleHandler
             }
         }
 
-        #endregion  
+        #endregion
 
         #region Helpers
         private static T ParamCheck<T>(Dictionary<string, string> map, string field, bool required = true)

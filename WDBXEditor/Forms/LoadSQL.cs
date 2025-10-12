@@ -117,7 +117,7 @@ namespace WDBXEditor
                     }
 
                 })
-				.ContinueWith(x =>
+                .ContinueWith(x =>
                 {
                     this.Enabled = true;
                     this.DialogResult = x.Result;

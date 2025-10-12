@@ -223,7 +223,7 @@ namespace WDBXEditor.Reader.FileTypes
                     // append relationship id
                     if (RelationShipData != null)
                     {
-                        // seen cases of missing indicies 
+                        // seen cases of missing indicies
                         if (RelationShipData.Entries.TryGetValue((uint)i, out byte[] foreignData))
                             recordbytes = recordbytes.Concat(foreignData);
                         else
@@ -334,7 +334,7 @@ namespace WDBXEditor.Reader.FileTypes
                     // append relationship id
                     if (RelationShipData != null)
                     {
-                        // seen cases of missing indicies 
+                        // seen cases of missing indicies
                         if (RelationShipData.Entries.TryGetValue((uint)i, out byte[] foreignData))
                             data.AddRange(foreignData);
                         else
@@ -437,7 +437,7 @@ namespace WDBXEditor.Reader.FileTypes
             bw.Write(Unknown1);
             bw.Write(Unknown2);
 
-            bw.Write(0);  // RecordDataOffset					
+            bw.Write(0);  // RecordDataOffset
             if (entry.Header.CopyTableSize > 0) // RecordDataRowCount
                 bw.Write(entry.GetUniqueRows().Count());
             else
@@ -484,7 +484,7 @@ namespace WDBXEditor.Reader.FileTypes
 
             long pos = bw.BaseStream.Position;
 
-            // get a list of identical records			
+            // get a list of identical records
             if (CopyTableSize > 0)
             {
                 var copyids = Enumerable.Empty<int>();
@@ -702,7 +702,7 @@ namespace WDBXEditor.Reader.FileTypes
                 }
             }
 
-            // push bitstream to 
+            // push bitstream to
             bitStream.CopyStreamTo(bw.BaseStream);
             bitStream.Dispose();
 
