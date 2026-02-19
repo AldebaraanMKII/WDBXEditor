@@ -207,13 +207,16 @@ namespace WDBXEditor.ConsoleHandler
 
             var entry = Database.Entries[0];
 
+            Console.WriteLine($"Importing {csvFileName}...");
             if ( !entry.ImportCSV(csvFileName, hasHeader, updateMode, out var importError, importMode) )
             {
                 var dbcFileName = ParamCheck<string>(pmap, "-f");
                 throw new Exception($"   Error importing {csvFileName} into {dbcFileName}: {importError}");
             }
 
+            Console.WriteLine($"Saving {entry.SavePath}...");
             new DBReader().Write(entry, entry.SavePath);
+            Console.WriteLine("Import complete.");
         }
         #endregion
 

@@ -17,6 +17,7 @@ namespace WDBXEditor.ConsoleHandler
 
         public static void ConsoleMain(string[] args)
         {
+            Console.WriteLine("Loading definitions...");
             Database.LoadDefinitions().Wait();
 
             if (CommandHandlers.ContainsKey(args[0].ToLower()))
@@ -64,15 +65,18 @@ namespace WDBXEditor.ConsoleHandler
             Dictionary<string, string> keyvalues = new Dictionary<string, string>();
             for (int i = 0; i < args.Length; i++)
             {
-                if (i == args.Length - 1)
-                    break;
-
                 string key = args[i].ToLower();
-                string value = args[++i];
-                if (value[0] == '"' && value[value.Length - 1] == '"')
-                    value = value.Substring(1, value.Length - 2);
+                if (!key.StartsWith("-")) continue;
 
-                keyvalues.Add(key, value);
+                string value = string.Empty;
+                if (i + 1 < args.Length && !args[i + 1].StartsWith("-"))
+                {
+                    value = args[++i];
+                    if (value.Length >= 2 && value[0] == '"' && value[value.Length - 1] == '"')
+                        value = value.Substring(1, value.Length - 2);
+                }
+
+                keyvalues[key] = value;
             }
 
             return keyvalues;

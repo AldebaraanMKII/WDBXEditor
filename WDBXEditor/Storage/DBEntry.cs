@@ -667,29 +667,9 @@ namespace WDBXEditor.Storage
 
                     while (!sr.EndOfStream)
                     {
-                        string line = "";
-
-                        // if it's not the end of the file, read the 2 first char
-                        if (sr.EndOfStream)
-                        {
-                            break;
-                        }
-                        line += (char)sr.Read();
-
-                        if (sr.EndOfStream)
-                        {
-                            break;
-                        }
-                        line += (char)sr.Read();
-
-                        // while it's not the end of a row (marked by \r\n), neither the end of the file, append the chars to the line
-                        while (line.Substring(line.Length-2) != "\r\n" && !sr.EndOfStream)
-                        {
-                            line += (char)sr.Read(); ;
-                        }
-
-                        // remove the \r\n last chars as the old code don't expect them
-                        line = line.Remove(line.Length - 2);
+                        string line = sr.ReadLine();
+                        if (string.IsNullOrWhiteSpace(line))
+                            continue;
 
                         string[] rows = Regex.Split(line, ",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))", RegexOptions.Compiled);
                         DataRow dr = importTable.NewRow();
