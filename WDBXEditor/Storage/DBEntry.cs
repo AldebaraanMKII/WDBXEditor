@@ -639,13 +639,16 @@ namespace WDBXEditor.Storage
             error = string.Empty;
 
             DataTable importTable = Data.Clone(); //Clone table structure to help with mapping
-
-            HashSet<int> usedids = new HashSet<int>();
             int idcolumn = Data.Columns[Key].Ordinal;
             int maxid = int.MinValue;
 
-            string pathOnly = Path.GetDirectoryName(filename);
-            string fileName = Path.GetFileName(filename);
+            if (mode != UpdateMode.Replace)
+            {
+                foreach (DataRow row in Data.Rows)
+                    maxid = Math.Max(maxid, (int)row[idcolumn]);
+            }
+
+            HashSet<int> usedids = new HashSet<int>();
 
             Func<string, string> Unescape = s =>
             {
@@ -662,97 +665,148 @@ namespace WDBXEditor.Storage
             {
                 using (StreamReader sr = new StreamReader(File.OpenRead(filename)))
                 {
+                    Dictionary<int, int> columnMap = new Dictionary<int, int>();
                     if (headerrow)
-                        sr.ReadLine();
+                    {
+                        string headerLine = sr.ReadLine();
+                        if (headerLine != null)
+                        {
+                            string[] headers = Regex.Split(headerLine, ",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))", RegexOptions.Compiled);
+                            for (int i = 0; i < headers.Length; i++)
+                            {
+                                string header = Unescape(headers[i]);
+                                if (importTable.Columns.Contains(header))
+                                    columnMap[importTable.Columns[header].Ordinal] = i;
+                            }
 
+                            if (columnMap.Count == 0)
+                            {
+                                // Fallback to ordinal mapping if no headers match but column count is similar
+                                if (headers.Length >= Data.Columns.Count - 5 && headers.Length <= Data.Columns.Count + 5)
+                                {
+                                    for (int i = 0; i < Math.Min(Data.Columns.Count, headers.Length); i++)
+                                        columnMap[i] = i;
+                                }
+                                else
+                                {
+                                    error = "Import Failed: No columns matched the DBC definition and column counts are too different.";
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 0; i < Data.Columns.Count; i++)
+                            columnMap[i] = i;
+                    }
+
+                    int rowIndex = 0;
                     while (!sr.EndOfStream)
                     {
                         string line = sr.ReadLine();
                         if (string.IsNullOrWhiteSpace(line))
                             continue;
 
+                        rowIndex++;
                         string[] rows = Regex.Split(line, ",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))", RegexOptions.Compiled);
                         DataRow dr = importTable.NewRow();
 
-                        for (int i = 0; i < Data.Columns.Count; i++)
+                        foreach (var map in columnMap)
                         {
-                            string value = Unescape(rows[i]);
+                            int colIndex = map.Key;
+                            int csvIndex = map.Value;
 
-                            switch (Data.Columns[i].DataType.Name.ToLower())
+                            if (csvIndex >= rows.Length)
+                                continue;
+
+                            string value = Unescape(rows[csvIndex]);
+                            if (string.IsNullOrEmpty(value) && Data.Columns[colIndex].DataType != typeof(string))
                             {
-                                case "sbyte":
-                                    dr[i] = Convert.ToSByte(value);
-                                    break;
-                                case "byte":
-                                    dr[i] = Convert.ToByte(value);
-                                    break;
-                                case "int32":
-                                case "int":
-                                    dr[i] = Convert.ToInt32(value);
-                                    break;
-                                case "uint32":
-                                case "uint":
-                                    dr[i] = Convert.ToUInt32(value);
-                                    break;
-                                case "int64":
-                                case "long":
-                                    dr[i] = Convert.ToInt64(value);
-                                    break;
-                                case "uint64":
-                                case "ulong":
-                                    dr[i] = Convert.ToUInt64(value);
-                                    break;
-                                case "single":
-                                case "float":
-                                    dr[i] = Convert.ToSingle(value);
-                                    break;
-                                case "boolean":
-                                case "bool":
-                                    dr[i] = Convert.ToBoolean(value);
-                                    break;
-                                case "string":
-                                    dr[i] = value;
-                                    break;
-                                case "int16":
-                                case "short":
-                                    dr[i] = Convert.ToInt16(value);
-                                    break;
-                                case "uint16":
-                                case "ushort":
-                                    dr[i] = Convert.ToUInt16(value);
-                                    break;
+                                dr[colIndex] = Data.Columns[colIndex].DefaultValue;
+                                continue;
                             }
 
-                            //Double check our Ids
-                            if (i == idcolumn)
+                            try
                             {
-                                int id = (int)dr[i];
-
-                                if (flags.HasFlag(ImportFlags.TakeNewest) && usedids.Contains(id))
+                                switch (Data.Columns[colIndex].DataType.Name.ToLower())
                                 {
-                                    var prev = importTable.Rows.Find(id);
-                                    if (prev != null)
-                                        importTable.Rows.Remove(prev);
+                                    case "sbyte":
+                                        dr[colIndex] = Convert.ToSByte(value);
+                                        break;
+                                    case "byte":
+                                        dr[colIndex] = Convert.ToByte(value);
+                                        break;
+                                    case "int32":
+                                    case "int":
+                                        dr[colIndex] = Convert.ToInt32(value);
+                                        break;
+                                    case "uint32":
+                                    case "uint":
+                                        dr[colIndex] = Convert.ToUInt32(value);
+                                        break;
+                                    case "int64":
+                                    case "long":
+                                        dr[colIndex] = Convert.ToInt64(value);
+                                        break;
+                                    case "uint64":
+                                    case "ulong":
+                                        dr[colIndex] = Convert.ToUInt64(value);
+                                        break;
+                                    case "single":
+                                    case "float":
+                                        dr[colIndex] = float.Parse(value.Replace(",", "."), System.Globalization.CultureInfo.InvariantCulture);
+                                        break;
+                                    case "boolean":
+                                    case "bool":
+                                        dr[colIndex] = (value == "1" || value.ToLower() == "true");
+                                        break;
+                                    case "string":
+                                        dr[colIndex] = value;
+                                        break;
+                                    case "int16":
+                                    case "short":
+                                        dr[colIndex] = Convert.ToInt16(value);
+                                        break;
+                                    case "uint16":
+                                    case "ushort":
+                                        dr[colIndex] = Convert.ToUInt16(value);
+                                        break;
                                 }
-                                else if (flags.HasFlag(ImportFlags.FixIds) && usedids.Contains(id))
-                                {
-                                    dr[i] = ++maxid;
-                                    id = (int)dr[i];
-                                }
-
-                                usedids.Add(id); //Add to list
-                                maxid = Math.Max(maxid, id); //Update maxid
+                            }
+                            catch (Exception ex)
+                            {
+                                error = $"Error in row {rowIndex}, column {Data.Columns[colIndex].ColumnName}: {ex.Message} (Value: '{value}')";
+                                return false;
                             }
                         }
+
+                        //Double check our Ids
+                        if (!columnMap.ContainsKey(idcolumn))
+                        {
+                            error = $"Import Failed: ID column '{Key}' not found in CSV and no ordinal mapping possible.";
+                            return false;
+                        }
+
+                        int id = (int)dr[idcolumn];
+                        if (flags.HasFlag(ImportFlags.TakeNewest) && usedids.Contains(id))
+                        {
+                            var prev = importTable.Rows.Find(id);
+                            if (prev != null)
+                                importTable.Rows.Remove(prev);
+                        }
+                        else if (flags.HasFlag(ImportFlags.FixIds) && usedids.Contains(id))
+                        {
+                            dr[idcolumn] = ++maxid;
+                            id = (int)dr[idcolumn];
+                        }
+
+                        usedids.Add(id); //Add to list
+                        maxid = Math.Max(maxid, id); //Update maxid
 
                         importTable.Rows.Add(dr);
                     }
                 }
-            }
-            catch (FormatException)
-            {
-                error = $"Mismatch of data to datatype in row index {usedids.Count + 1}";
-                return false;
             }
             catch (Exception ex)
             {

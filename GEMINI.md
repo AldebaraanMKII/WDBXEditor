@@ -29,14 +29,15 @@ This is a program made with C# .NET Framework 4.6.1 used to edit World of Warcra
 
 
 Latest build is located in "WDBXEditor\bin\Debug" folder.
+The definition file for build 12340 is in "WDBXEditor\bin\Debug\Definitions\WotLK 3.3.5 (12340).xml".
 
 
-# Objectives
+
+# What was done previously:
 & "C:\Users\Antares\Documents\Github\WDBXEditor\WDBXEditor\bin\Debug\WDBX Editor.exe" -import -f "C:\Users\Antares\Desktop\Mounts Work\DBC Azerothcore\SpellIcon.dbc" -b 12340 -c "C:\Users\Antares\Desktop\Mounts Work\DBC Azerothcore\SpellIcon.csv" -h true -u Update -i FixIds
 
 Using the command above to import a CSV data into a DBC file does not work, even though the program is supposed to have feature.
 Opening the SpellIcon.dbc in the GUI and importing the CSV manually works perfectly.
-
 
 the files responsible for this are:
 WDBXEditor\ConsoleHandler\ConsoleCommands.cs
