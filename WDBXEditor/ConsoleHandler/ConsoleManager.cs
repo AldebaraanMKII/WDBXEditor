@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using WDBXEditor.Storage;
@@ -12,11 +13,29 @@ namespace WDBXEditor.ConsoleHandler
     {
         public static bool ConsoleMode { get; set; } = false;
 
+        [DllImport("kernel32.dll")]
+        static extern bool AttachConsole(int dwProcessId);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        static extern bool FreeConsole();
+
         public static Dictionary<string, HandleCommand> CommandHandlers = new Dictionary<string, HandleCommand>();
         public delegate void HandleCommand(string[] args);
 
         public static void ConsoleMain(string[] args)
         {
+            if (AttachConsole(-1))
+            {
+                // Redirect stdout to console
+                var standardOutput = new System.IO.StreamWriter(Console.OpenStandardOutput());
+                standardOutput.AutoFlush = true;
+                Console.SetOut(standardOutput);
+
+                var standardError = new System.IO.StreamWriter(Console.OpenStandardError());
+                standardError.AutoFlush = true;
+                Console.SetError(standardError);
+            }
+
             Console.WriteLine("Loading definitions...");
             Database.LoadDefinitions().Wait();
 
@@ -40,6 +59,16 @@ namespace WDBXEditor.ConsoleHandler
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                if (ex is AggregateException age)
+                {
+                    foreach (var inner in age.InnerExceptions)
+                        Console.WriteLine("   " + inner.Message);
+                }
+                else if (ex.InnerException != null)
+                {
+                    Console.WriteLine("   " + ex.InnerException.Message);
+                }
+
                 Console.WriteLine("");
                 return false;
             }
