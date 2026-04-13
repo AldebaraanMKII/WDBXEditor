@@ -951,15 +951,19 @@ namespace WDBXEditor.Storage
                     break;
 
                 case UpdateMode.Update:
-                    //Insert all the missing existing rows into the new dataset then change the datatable
+                    //Get original rows that are missing from the CSV and then append the CSV to it
                     var rows2 = importTable.Except(Data, Key);
+                    var source2 = Data.Clone();
 
-                    importTable.BeginLoadData();
+                    source2.BeginLoadData();
                     foreach (var r in rows2)
-                        importTable.Rows.Add(r);
-                    importTable.EndLoadData();
+                        source2.Rows.Add(r);
 
-                    Data = importTable.Copy();
+                    foreach (DataRow r in importTable.Rows)
+                        source2.Rows.Add(r.ItemArray);
+                    source2.EndLoadData();
+
+                    Data = source2;
                     break;
             }
 
