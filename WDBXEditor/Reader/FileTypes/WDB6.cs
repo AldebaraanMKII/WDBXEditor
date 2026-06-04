@@ -343,6 +343,15 @@ namespace WDBXEditor.Reader.FileTypes
                             data = rows.Where(x => (byte)x[field] != byte.Parse(numberDefault)).ToDictionary(x => (int)x[pk], y => new byte[] { (byte)y[field] });
                             padding = 3;
                             break;
+                        case TypeCode.Boolean:
+                            bool defBool = numberDefault == "1" || numberDefault.ToLower() == "true";
+                            data = rows.Where(x => (bool)x[field] != defBool).ToDictionary(x => (int)x[pk], y => new byte[] { (byte)((bool)y[field] ? 1 : 0) });
+                            padding = 3;
+                            break;
+                        case TypeCode.SByte:
+                            data = rows.Where(x => (sbyte)x[field] != sbyte.Parse(numberDefault)).ToDictionary(x => (int)x[pk], y => new byte[] { (byte)(sbyte)y[field] });
+                            padding = 3;
+                            break;
                         default:
                             continue;
                     }

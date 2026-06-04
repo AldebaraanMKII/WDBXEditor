@@ -418,6 +418,9 @@ namespace WDBXEditor.Reader
 
                     switch (columnTypes[j])
                     {
+                        case TypeCode.Boolean:
+                            bw.Write(row.Field<bool>(j));
+                            break;
                         case TypeCode.SByte:
                             bw.Write(row.Field<sbyte>(j));
                             break;

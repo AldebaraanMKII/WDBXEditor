@@ -383,6 +383,7 @@ namespace WDBXEditor.Reader.FileTypes
             {
                 { TypeCode.Byte, 1 },
                 { TypeCode.SByte, 1 },
+                { TypeCode.Boolean, 1 },
                 { TypeCode.UInt16, 2 },
                 { TypeCode.Int16, 2 },
                 { TypeCode.Int32, 4 },

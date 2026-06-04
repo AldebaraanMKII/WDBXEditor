@@ -117,6 +117,7 @@ namespace WDBXEditor.Common
             { TypeCode.Int16, 1 },
             { TypeCode.UInt16, 1 },
             { TypeCode.Byte, 2 },
+            { TypeCode.Boolean, 2 },
             { TypeCode.SByte, 2 },
             { TypeCode.Single, 3 },
             { TypeCode.Int32, 4 },
