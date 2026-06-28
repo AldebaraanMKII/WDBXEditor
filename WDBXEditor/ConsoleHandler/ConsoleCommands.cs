@@ -104,7 +104,7 @@ namespace WDBXEditor.ConsoleHandler
             if (Database.Entries.Count == 0)
                 throw new Exception("   File could not be loaded.");
 
-            Console.WriteLine($"{Path.GetFileName(file)} loaded.");
+            ConsoleManager.WriteSuccess($"{Path.GetFileName(file)} loaded.");
             Console.WriteLine("");
         }
 
@@ -178,7 +178,7 @@ namespace WDBXEditor.ConsoleHandler
 
             dic.Clear();
 
-            Console.WriteLine($"   Successfully extracted files.");
+            ConsoleManager.WriteSuccess($"   Successfully extracted files.");
             Console.WriteLine("");
         }
         #endregion
@@ -216,7 +216,7 @@ namespace WDBXEditor.ConsoleHandler
 
             Console.WriteLine($"Saving {entry.SavePath}...");
             new DBReader().Write(entry, entry.SavePath);
-            Console.WriteLine("Import complete.");
+            ConsoleManager.WriteSuccess("Import complete.");
         }
         #endregion
 
@@ -253,7 +253,7 @@ namespace WDBXEditor.ConsoleHandler
 
                 fs.Write(data, 0, data.Length);
 
-                Console.WriteLine($"Successfully exported to {output}.");
+                ConsoleManager.WriteSuccess($"Successfully exported to {output}.");
             }
         }
 
@@ -283,7 +283,7 @@ namespace WDBXEditor.ConsoleHandler
 
                 entry.ToSQLTable(connection);
 
-                Console.WriteLine($"Successfully exported to {conn.Database}.");
+                ConsoleManager.WriteSuccess($"Successfully exported to {conn.Database}.");
             }
         }
 
